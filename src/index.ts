@@ -1,3 +1,4 @@
+import { createPersist } from './core/persist';
 export {
   useEntities,
   useEntityById,
@@ -9,6 +10,8 @@ export {
   registerStore,
   getStore,
 } from './core/storeRegistry';
+
+export { createPersist } from './core/persist';
 
 export { createEntityStore } from './core/createEntityStore';
 
