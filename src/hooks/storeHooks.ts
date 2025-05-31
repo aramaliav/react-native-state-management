@@ -1,17 +1,14 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getStore } from '../core/storeRegistry';
-import { StoreKey } from '@/stores/generic.store';
 
-export const useEntities = <T>(storeKey: StoreKey): T[] => {
+export const useEntities = <T>(storeKey: string): T[] => {
   const [entities, setEntities] = useState<T[]>([]);
 
   useEffect(() => {
     const store = getStore<T>(storeKey);
-    
     if (!store) return;
 
     return store.subscribe((state) => {
-      
       const all = state.ids.map((id) => state.entities[id]);
       setEntities(all);
     });
@@ -20,7 +17,7 @@ export const useEntities = <T>(storeKey: StoreKey): T[] => {
   return entities;
 };
 
-export const useEntityById = <T>(storeKey: StoreKey, id: string): T | null => {
+export const useEntityById = <T>(storeKey: string, id: string): T | null => {
   const [entity, setEntity] = useState<T | null>(null);
 
   useEffect(() => {
@@ -37,7 +34,7 @@ export const useEntityById = <T>(storeKey: StoreKey, id: string): T | null => {
   return entity;
 };
 
-export const useActiveEntity = <T>(storeKey: StoreKey): T | null => {
+export const useActiveEntity = <T>(storeKey: string): T | null => {
   const [active, setActive] = useState<T | null>(null);
 
   useEffect(() => {
@@ -56,7 +53,7 @@ export const useActiveEntity = <T>(storeKey: StoreKey): T | null => {
 };
 
 export const useEntityProperty = <T, K extends keyof T>(
-  storeKey: StoreKey,
+  storeKey: string,
   id: string,
   property: K
 ): T[K] | undefined => {

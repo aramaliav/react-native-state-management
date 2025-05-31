@@ -1,7 +1,6 @@
-import { StoreKey } from '@/stores/generic.store';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export const createPersist = <T>(key: StoreKey) => ({
+export const createPersist = <T>(key: string) => ({
   save: async (state: T) => {
     try {
       await AsyncStorage.setItem(key, JSON.stringify(state));

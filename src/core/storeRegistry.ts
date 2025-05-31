@@ -1,5 +1,3 @@
-import { StoreKey } from "@/stores/generic.store";
-
 export type EntityStore<T> = {
   getState: () => { entities: Record<string, T>; ids: string[], activeId?: string };
   setState: (updater: any) => void;
@@ -13,10 +11,14 @@ export type EntityStore<T> = {
 
 const registry: Record<string, EntityStore<any>> = {};
 
-export const registerStore = <T>(key: StoreKey, store: EntityStore<T>) => {
+export const registerStore = <T>(key: string, store: EntityStore<T>) => {
   registry[key] = store;
 };
 
-export const getStore = <T>(key: StoreKey): EntityStore<T> | undefined => {
+export const getStore = <T>(key: string): EntityStore<T> | undefined => {
   return registry[key];
+};
+
+export const getAvailableStoreKeys = (): string[] => {
+  return Object.keys(registry);
 };

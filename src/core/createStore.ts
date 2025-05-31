@@ -16,8 +16,6 @@ export interface Store<T> {
   isHydrated?: () => boolean;
 }
 
-
-
 function createStore<T>(
   initialState: T,
   options: CreateStoreOptions<T> = {}
@@ -29,7 +27,6 @@ function createStore<T>(
   const notify = () => subscribers.forEach(cb => cb(state));
 
   const setState: Store<T>["setState"] = (updater) => {
-    
     const nextState = typeof updater === 'function' ? updater(state) : updater;
     state = { ...state, ...nextState };
     notify();
