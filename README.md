@@ -1,0 +1,30 @@
+# @aramaliav/react-native-entity-store
+
+🔌 Akita-style entity store for React Native — with persist, active entity support, and fully type-safe hooks.
+
+## Installation
+\`\`\`bash
+npm install @aramaliav/react-native-entity-store
+\`\`\`
+
+## Usage
+\`\`\`tsx
+import { useEntities, addEntity } from '@aramaliav/react-native-entity-store';
+
+const tasks = useEntities('taskStore');
+addEntity('taskStore', { id: '1', title: 'My task', done: false });
+\`\`\`
+
+## API
+- useEntities
+- useEntityById
+- useActiveEntity
+- useEntityProperty
+- addEntity
+- updateEntity
+- removeEntity
+- setActiveEntity
+- getAvailableStoreKeys
+
+## License
+MIT
