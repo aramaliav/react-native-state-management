@@ -6,6 +6,13 @@ export {
 } from './hooks/storeHooks';
 
 export {
+  registerStore,
+  getStore,
+} from './core/storeRegistry';
+
+export { createEntityStore } from './core/createEntityStore';
+
+export {
   addEntity,
   updateEntity,
   removeEntity,

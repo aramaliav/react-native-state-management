@@ -1,6 +1,6 @@
 import createStore from './createStore';
 
-const createEntityStore = <T extends { id: string }>(options = {}) => {
+export const createEntityStore = <T extends { id: string }>(options = {}) => {
   const store = createStore<{ entities: Record<string, T>; ids: string[]; activeId?: string }>({ entities: {}, ids: [], activeId: undefined }, options);
 
   const add = (entity: T) => {
