@@ -5,33 +5,47 @@ export const createEntityStore = <T extends { id: string }>(options:CreateStoreO
 
   const add = (entity: T) => {
     store.setState((prev) => {
-      if (prev.entities[entity.id]) return prev;
+      let nextState = prev;
+      if (options.preAdd) {
+        nextState = options.preAdd(prev, entity);
+      }
+      if (nextState.entities[entity.id]) return nextState;
       return {
-        entities: { ...prev.entities, [entity.id]: entity },
-        ids: [...prev.ids, entity.id],
+        ...nextState,
+        entities: { ...nextState.entities, [entity.id]: entity },
+        ids: [...nextState.ids, entity.id],
       };
     });
   };
 
   const update = (id: string, changes: Partial<T>) => {
     store.setState((prev) => {
-      const current = prev.entities[id];
-      if (!current) return prev;
+      let nextState = prev;
+      if (options.preUpdate) {
+        nextState = options.preUpdate(prev, id, changes);
+      }
+      const current = nextState.entities[id];
+      if (!current) return nextState;
       const updated = { ...current, ...changes };
       return {
-        ...prev,
-        entities: { ...prev.entities, [id]: updated },
+        ...nextState,
+        entities: { ...nextState.entities, [id]: updated },
       };
     });
   };
 
   const remove = (id: string) => {
     store.setState((prev) => {
-      const { [id]: removed, ...rest } = prev.entities;
+      let nextState = prev;
+      if (options.preRemove) {
+        nextState = options.preRemove(prev, id);
+      }
+      const { [id]: removed, ...rest } = nextState.entities;
       return {
+        ...nextState,
         entities: rest,
-        ids: prev.ids.filter((i) => i !== id),
-        activeId: prev.activeId === id ? undefined : prev.activeId,
+        ids: nextState.ids.filter((i) => i !== id),
+        activeId: nextState.activeId === id ? undefined : nextState.activeId,
       };
     });
   };
