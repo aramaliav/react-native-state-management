@@ -5,7 +5,7 @@ export interface PersistOption<T> {
   load: () => Promise<T | null>;
 }
 
-export interface CreateStoreOptions<T> {
+export interface CreateStoreOptions<T = any> {
   persist?: PersistOption<T>;
   middleware?: Middleware<T>[];
 }
@@ -24,7 +24,7 @@ function createStore<T>(
   let state = initialState;
   let hydrated = false;
   const subscribers: Set<Subscriber<T>> = new Set();
-  
+
   const applyMiddleware = (state: T) => {
     if (options.middleware) {
       options.middleware.forEach(fn => fn(state));
