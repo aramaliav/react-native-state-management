@@ -14,6 +14,7 @@ export const addEntity = <T extends { id: string }>(storeKey: string, entityOrAr
 };
 
 export const updateEntity = <T>(storeKey: string, id: string, changes: Partial<T>) => {
+
   const store = getStore<T>(storeKey);
   if (store) store.update(id, changes);
 };

@@ -1,23 +1,5 @@
-export type Subscriber<T> = (state: T) => void;
+import { CreateStoreOptions, Store, Subscriber } from "../interfaces/store-interfaces";
 
-export interface PersistOption<T> {
-  save: (state: T) => Promise<void>;
-  load: () => Promise<T | null>;
-}
-
-export interface CreateStoreOptions<T = any> {
-  
-  persist?: PersistOption<T>;
-  preAdd?: (state: T, entity: any) => T;
-  preUpdate?: (state: T, id: string, changes: any) => T;
-  preRemove?: (state: T, id: string) => boolean;
-}
-export interface Store<T> {
-  getState: () => T;
-  setState: (updater: Partial<T> | ((prevState: T) => Partial<T>)) => void;
-  subscribe: (callback: Subscriber<T>) => () => void;
-  isHydrated?: () => boolean;
-}
 
 function createStore<T>(
   initialState: T,
@@ -26,7 +8,6 @@ function createStore<T>(
   let state = initialState;
   let hydrated = false;
   const subscribers: Set<Subscriber<T>> = new Set();
-
 
   const notify = () => subscribers.forEach(cb => {
     cb(state);
@@ -40,8 +21,6 @@ function createStore<T>(
   };
 
   const getState: Store<T>["getState"] = () => state;
-
-
 
   const subscribe: Store<T>["subscribe"] = (callback) => {
     subscribers.add(callback);
