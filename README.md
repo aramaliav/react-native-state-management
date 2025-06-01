@@ -1,82 +1,204 @@
-# User Documentation for Store Management System
+# React Native State Management Library
 
-## Description
-This code defines a user store using `createEntityStore` and registers it with `registerStore`. The store includes "pre" functions for adding, updating, and removing users.
+A lightweight, extensible state management solution for React Native, inspired by Akita, with built-in support for entity stores, persistence, and React hooks.
+
+---
+
+## Features
+
+- **Entity Store**: Manage collections of entities with CRUD operations.
+- **Global Store**: Create and manage global state.
+- **Persistence**: Persist state using AsyncStorage or SecureStore.
+- **Store Registry**: Register and retrieve stores by key.
+- **React Hooks**: Subscribe to entities, entity by ID, active entity, or entity property.
+- **Pre-hooks**: Intercept add, update, and remove operations for custom logic.
+- **TypeScript Support**: Fully typed API.
+
+---
 
 ## Installation
-To use this code, make sure the required libraries are installed in your project. Install the necessary dependencies:
 
 ```bash
-npm install <dependencies>
+npm install react-native-entity-store
 ```
 
-## Usage
-To initialize the user store, call the `initStore` function in your application's main file:
+---
+
+## API Overview
+
+### 1. Entity Store
+
+Create an entity store for managing collections of objects (entities).
 
 ```typescript
-import { initStore } from './path/to/store-init';
+import { createEntityStore, registerStore } from 'react-native-entity-store';
 
-initStore();
-```
-
-## Store Functions
-
-### `preAdd`
-This function runs before adding a new entity to the store. It modifies the name of the user being added so it starts with "LIAV" followed by a random string.
-
-#### Parameters:
-- `state`: The current store state.
-- `entity`: The entity (user) being added.
-
-#### Returns:
-- The entity with the updated name.
-
-### `preRemove`
-This function runs before removing an entity from the store. It logs the ID of the user being removed and the current store state.
-
-#### Parameters:
-- `state`: The current store state.
-- `id`: The ID of the user being removed.
-
-### `preUpdate`
-This function runs before updating an entity in the store. It logs the user ID, current store state, and the changes to be applied.
-
-#### Parameters:
-- `state`: The current store state.
-- `id`: The ID of the user being updated.
-- `changes`: The changes to apply to the user.
-
-#### Returns:
-- The changes to be applied.
-
-## Registering the Store
-After creating the store, register it using `registerStore`:
-
-```typescript
-registerStore('usersStore', userStore);
-```
-
-## Example Usage
-```typescript
 const userStore = createEntityStore({
-    preAdd: (state, entity) => {
-        entity.name = Math.random().toString(36).substring(2, 15);
-        return entity;
-    },
-    preRemove(state, id) {
-        console.log(`Removing user with id: ${id}`);
-        console.log(`Current state before removal:`, state);
-    },
-    preUpdate(state, id, changes) {
-        console.log(`Updating user with id: ${id}`);
-        console.log(`Current state before update:`, state);
-        console.log(`Changes to apply:`, changes);
-        return changes;
-    },
+  preAdd: (state, entity) => {
+    // Modify entity before adding
+    return entity;
+  },
+  preRemove: (state, id) => {
+    // Logic before removing
+  },
+  preUpdate: (state, id, changes) => {
+    // Logic before updating
+    return changes;
+  },
+  persist: createAsyncStoragePersist('usersStore'),
 });
 
 registerStore('usersStore', userStore);
 ```
 
-## Summary
-This code provides a simple interface for managing users in a store. You can extend and customize the functions as needed for your application's requirements.
+#### Entity Store Methods
+
+- `add(entity)`: Add a new entity.
+- `update(id, changes)`: Update an entity by ID.
+- `remove(id)`: Remove an entity by ID.
+- `setActive(id)`: Set the active entity.
+- `getActive()`: Get the currently active entity.
+- `reset()`: Reset the store (and clear persistence if enabled).
+- `getState()`: Get the current state.
+- `setState(updater)`: Update the state.
+- `subscribe(callback)`: Subscribe to state changes.
+
+---
+
+### 2. Global Store
+
+Create a global store for any state shape.
+
+```typescript
+import createStore from 'react-native-entity-store';
+
+const counterStore = createStore({ count: 0 }, {
+  persist: createAsyncStoragePersist('counterStore'),
+});
+```
+
+#### Global Store Methods
+
+- `getState()`
+- `setState(updater)`
+- `subscribe(callback)`
+- `isHydrated()`
+
+---
+
+### 3. Persistence
+
+Persist store state using AsyncStorage or SecureStore.
+
+```typescript
+import { createAsyncStoragePersist, createSecureStorePersist } from 'react-native-entity-store';
+
+const persist = createAsyncStoragePersist('myStoreKey');
+// or
+const persist = createSecureStorePersist('myStoreKey');
+```
+
+---
+
+### 4. Store Registry
+
+Register and retrieve stores by key.
+
+```typescript
+import { registerStore, getStore, getAvailableStoreKeys } from 'react-native-entity-store';
+
+registerStore('usersStore', userStore);
+
+const store = getStore('usersStore');
+const keys = getAvailableStoreKeys();
+```
+
+---
+
+### 5. React Hooks
+
+Subscribe to store data in React components.
+
+```typescript
+import { useEntities, useEntityById, useActiveEntity, useEntityProperty } from 'react-native-entity-store';
+
+const users = useEntities('usersStore');
+const user = useEntityById('usersStore', userId);
+const activeUser = useActiveEntity('usersStore');
+const userName = useEntityProperty('usersStore', userId, 'name');
+```
+
+---
+
+### 6. Generic Entity Services
+
+Perform CRUD operations using service functions.
+
+```typescript
+import { addEntity, updateEntity, removeEntity, setActiveEntity, resetStore } from 'react-native-entity-store';
+
+addEntity('usersStore', { id: '1', name: 'Alice' });
+updateEntity('usersStore', '1', { name: 'Bob' });
+removeEntity('usersStore', '1');
+setActiveEntity('usersStore', '1');
+resetStore('usersStore');
+```
+
+---
+
+## Advanced: Pre-hooks
+
+Customize behavior before add, update, or remove operations.
+
+```typescript
+const userStore = createEntityStore({
+  preAdd: (state, entity) => {
+    entity.name = 'Prefix_' + entity.name;
+    return entity;
+  },
+  preRemove: (state, id) => {
+    console.log('Removing', id);
+  },
+  preUpdate: (state, id, changes) => {
+    changes.updatedAt = Date.now();
+    return changes;
+  },
+});
+```
+
+---
+
+## Folder Structure
+
+```
+src/
+  core/
+    createEntityStore.ts
+    createStore.ts
+    persist.ts
+    storeRegistry.ts
+  hooks/
+    storeHooks.ts
+  interfaces/
+    store-interfaces.ts
+  services/
+    generic.service.ts
+  stores/
+    generic.store.ts
+  index.ts
+```
+
+---
+
+## TypeScript Types
+
+- `Store<T>`: Generic store interface.
+- `EntityStore<T>`: Entity store interface.
+- `PersistOption<T>`: Persistence interface.
+- `Subscriber<T>`: Subscription callback type.
+
+---
+
+## License
+
+MIT
