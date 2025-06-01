@@ -6,10 +6,11 @@ export interface PersistOption<T> {
 }
 
 export interface CreateStoreOptions<T = any> {
+  
   persist?: PersistOption<T>;
   preAdd?: (state: T, entity: any) => T;
   preUpdate?: (state: T, id: string, changes: any) => T;
-  preRemove?: (state: T, id: string) => T;
+  preRemove?: (state: T, id: string) => boolean;
 }
 export interface Store<T> {
   getState: () => T;
