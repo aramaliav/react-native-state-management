@@ -1,12 +1,16 @@
 import { getStore } from '../core/storeRegistry';
 
-export const addEntity = <T extends { id: string }>(storeKey: string, entity: T) => {
+export const addEntity = <T extends { id: string }>(storeKey: string, entityOrArray: T | T[]) => {
   const store = getStore<T>(storeKey);
   if (!store) {
     console.warn(`Store '${storeKey}' not found`);
     return;
   }
-  store.add(entity);
+  if (Array.isArray(entityOrArray)) {
+    entityOrArray.forEach(entity => store.add(entity));
+  } else {
+    store.add(entityOrArray);
+  }
 };
 
 export const updateEntity = <T>(storeKey: string, id: string, changes: Partial<T>) => {
