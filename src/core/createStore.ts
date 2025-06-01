@@ -9,7 +9,7 @@ export interface CreateStoreOptions<T = any> {
   persist?: PersistOption<T>;
   middleware?: Middleware<T>[];
 }
-export type Middleware<T> = (state: T) => void;
+export type Middleware<T> = (state: Partial<T>) => void;
 export interface Store<T> {
   getState: () => T;
   setState: (updater: Partial<T> | ((prevState: T) => Partial<T>)) => void;
@@ -25,14 +25,13 @@ function createStore<T>(
   let hydrated = false;
   const subscribers: Set<Subscriber<T>> = new Set();
 
-  const applyMiddleware = (state: T) => {
+  const applyMiddleware = (state: Partial<T>) => {
     if (options.middleware) {
       options.middleware.forEach(fn => fn(state));
     }
   };
 
   const notify = () => subscribers.forEach(cb => {
-    applyMiddleware(state);
     cb(state);
   });
 
@@ -40,6 +39,7 @@ function createStore<T>(
     const nextState = typeof updater === 'function' ? updater(state) : updater;
     state = { ...state, ...nextState };
     notify();
+    applyMiddleware(nextState);
     if (options.persist) options.persist.save(state);
   };
 
