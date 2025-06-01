@@ -7,6 +7,7 @@ export type EntityStore<T> = {
   remove: (id: string) => void;
   setActive: (id: string) => void;
   getActive: () => T | null;
+  reset: () => Promise<void>;
 };
 
 const registry: Record<string, EntityStore<any>> = {};
@@ -18,7 +19,6 @@ export const registerStore = <T>(key: string, store: EntityStore<T>) => {
 export const getStore = <T>(key: string): EntityStore<T> | undefined => {
   return registry[key];
 };
-
 
 export const getAvailableStoreKeys = (): string[] => {
   return Object.keys(registry);

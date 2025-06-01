@@ -17,4 +17,11 @@ export const createPersist = <T>(key: string) => ({
       return null;
     }
   },
+  clear: async () => {
+    try {
+      await AsyncStorage.removeItem(key);
+    } catch (e) {
+      console.warn('Failed to clear persisted state', e);
+    }
+  }
 });

@@ -28,3 +28,12 @@ export const setActiveEntity = <T>(storeKey: string, id: string) => {
   const store = getStore<T>(storeKey);
   if (store) store.setActive(id);
 };
+
+export const resetStore = <T = any>(storeKey: string) => {
+  const store = getStore<T>(storeKey);
+  if (!store || !store.reset) {
+    console.warn(`Store '${storeKey}' not found or doesn't support reset`);
+    return;
+  }
+  store.reset();
+};

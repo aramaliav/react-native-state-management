@@ -2,6 +2,7 @@ import { CreateStoreOptions } from "../interfaces/store-interfaces";
 import createStore from "./createStore";
 
 export const createEntityStore = <T extends { id: string }>(options: CreateStoreOptions) => {
+  const initialState = { entities: {}, ids: [], activeId: undefined };
   const store = createStore<{ entities: Record<string, T>; ids: string[]; activeId?: string }>({ entities: {}, ids: [], activeId: undefined }, options);
 
   const add = (entity: T) => {
@@ -60,6 +61,13 @@ export const createEntityStore = <T extends { id: string }>(options: CreateStore
     return state.activeId ? state.entities[state.activeId] ?? null : null;
   };
 
+  const reset = async () => {
+    store.setState(() => initialState);
+    if (options.persist) {
+      await options.persist.clear();
+    }
+  };
+
   return {
     ...store,
     add,
@@ -67,6 +75,7 @@ export const createEntityStore = <T extends { id: string }>(options: CreateStore
     remove,
     setActive,
     getActive,
+    reset,
   };
 };
 
