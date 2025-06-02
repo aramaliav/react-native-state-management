@@ -1,18 +1,19 @@
 # React Native State Management Library
 
-A lightweight, extensible state management solution for React Native, inspired by Akita, with built-in support for entity stores, persistence, and React hooks.
+A lightweight, extensible state management solution for React Native, inspired by Akita, with built-in support for entity stores, persistence, store registry, and React hooks.
 
 ---
 
 ## Features
 
-- **Entity Store**: Manage collections of entities with CRUD operations.
-- **Global Store**: Create and manage global state.
-- **Persistence**: Persist state using AsyncStorage or SecureStore.
-- **Store Registry**: Register and retrieve stores by key.
-- **React Hooks**: Subscribe to entities, entity by ID, active entity, or entity property.
+- **Entity Store**: Manage collections of entities with CRUD operations, active entity, and property selectors.
+- **Global Store**: Manage any global state shape with subscription and hydration support.
+- **Persistence**: Persist state using AsyncStorage or SecureStore, with auto-hydration and reset.
+- **Store Registry**: Register, retrieve, and list stores by key.
+- **React Hooks**: Subscribe to entities, single entity by ID, active entity, or entity property.
 - **Pre-hooks**: Intercept add, update, and remove operations for custom logic.
-- **TypeScript Support**: Fully typed API.
+- **Generic Services**: Perform CRUD and state operations on any registered store.
+- **TypeScript Support**: Fully typed API for safety and autocompletion.
 
 ---
 
@@ -34,17 +35,9 @@ Create an entity store for managing collections of objects (entities).
 import { createEntityStore, registerStore } from 'react-native-entity-store';
 
 const userStore = createEntityStore({
-  preAdd: (state, entity) => {
-    // Modify entity before adding
-    return entity;
-  },
-  preRemove: (state, id) => {
-    // Logic before removing
-  },
-  preUpdate: (state, id, changes) => {
-    // Logic before updating
-    return changes;
-  },
+  preAdd: (state, entity) => entity,
+  preRemove: (state, id) => {},
+  preUpdate: (state, id, changes) => changes,
   persist: createAsyncStoragePersist('usersStore'),
 });
 
@@ -59,9 +52,6 @@ registerStore('usersStore', userStore);
 - `setActive(id)`: Set the active entity.
 - `getActive()`: Get the currently active entity.
 - `reset()`: Reset the store (and clear persistence if enabled).
-- `getState()`: Get the current state.
-- `setState(updater)`: Update the state.
-- `subscribe(callback)`: Subscribe to state changes.
 
 ---
 
@@ -98,6 +88,9 @@ const persist = createAsyncStoragePersist('myStoreKey');
 const persist = createSecureStorePersist('myStoreKey');
 ```
 
+- **Auto-hydration**: State is loaded from storage on app start.
+- **Reset**: Clears persisted state.
+
 ---
 
 ### 4. Store Registry
@@ -120,12 +113,21 @@ const keys = getAvailableStoreKeys();
 Subscribe to store data in React components.
 
 ```typescript
-import { useEntities, useEntityById, useActiveEntity, useEntityProperty } from 'react-native-entity-store';
+import {
+  useEntities,
+  useEntityById,
+  useActiveEntity,
+  useEntityProperty,
+  useFilteredEntities,
+  useSortedEntities,
+} from 'react-native-entity-store';
 
 const users = useEntities('usersStore');
 const user = useEntityById('usersStore', userId);
 const activeUser = useActiveEntity('usersStore');
 const userName = useEntityProperty('usersStore', userId, 'name');
+const filteredUsers = useFilteredEntities('usersStore', (user) => user.active);
+const sortedUsers = useSortedEntities('usersStore', 'name', 'asc');
 ```
 
 ---
@@ -135,12 +137,20 @@ const userName = useEntityProperty('usersStore', userId, 'name');
 Perform CRUD operations using service functions.
 
 ```typescript
-import { addEntity, updateEntity, removeEntity, setActiveEntity, resetStore } from 'react-native-entity-store';
+import {
+  addEntity,
+  addEntities
+  updateEntity,
+  removeEntity,
+  setActiveEntity,
+  resetStore,
+} from 'react-native-entity-store';
 
 addEntity('usersStore', { id: '1', name: 'Alice' });
+addEntities('usersStore', [{ id: '2', name: 'Bob' }]);
 updateEntity('usersStore', '1', { name: 'Bob' });
 removeEntity('usersStore', '1');
-setActiveEntity('usersStore', '1');
+setActiveEntity('usersStore', '2');
 resetStore('usersStore');
 ```
 
@@ -173,19 +183,19 @@ const userStore = createEntityStore({
 ```
 src/
   core/
-    createEntityStore.ts
-    createStore.ts
-    persist.ts
-    storeRegistry.ts
+    createEntityStore.ts      // Entity store logic
+    createStore.ts            // Global store logic
+    persist.ts                // Persistence (AsyncStorage/SecureStore)
+    storeRegistry.ts          // Store registry management
   hooks/
-    storeHooks.ts
+    storeHooks.ts             // React hooks for stores
   interfaces/
-    store-interfaces.ts
+    store-interfaces.ts       // TypeScript interfaces and types
   services/
-    generic.service.ts
+    generic.service.ts        // Generic CRUD and state services
   stores/
-    generic.store.ts
-  index.ts
+    generic.store.ts          // Generic store implementation
+  index.ts                    // Library entry point
 ```
 
 ---
