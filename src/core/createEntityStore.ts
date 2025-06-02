@@ -8,10 +8,10 @@ export const createEntityStore = <T extends { id: string }>(options: CreateStore
   const add = (entity: T) => {
     store.setState((prev) => {
       let nextState = prev;
+      if (nextState.entities[entity.id]) return nextState;
       if (options.preAdd) {
         entity = options.preAdd(prev, entity);
       }
-      if (nextState.entities[entity.id]) return nextState;
       return {
         ...nextState,
         entities: { ...nextState.entities, [entity.id]: entity },
@@ -23,11 +23,11 @@ export const createEntityStore = <T extends { id: string }>(options: CreateStore
   const update = (id: string, changes: Partial<T>) => {
     store.setState((prev) => {
       let nextState = prev;
+      const current = nextState.entities[id];
+      if (!current) return nextState;
       if (options.preUpdate) {
         changes = options.preUpdate(prev, id, changes);
       }
-      const current = nextState.entities[id];
-      if (!current) return nextState;
       const updated = { ...current, ...changes };
       return {
         ...nextState,

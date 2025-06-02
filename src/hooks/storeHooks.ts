@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getStore } from '../core/storeRegistry';
 
 export const useEntities = <T>(storeKey: string): T[] => {
@@ -79,4 +79,64 @@ export const useEntityProperty = <T, K extends keyof T>(
   }, [storeKey, id, property]);
 
   return value;
+};
+
+export const useFilteredEntities = <T>(
+  storeKey: string,
+  predicate: (entity: T) => boolean
+): T[] => {
+  const [filtered, setFiltered] = useState<T[]>([]);
+  const predicateRef = useRef(predicate);
+
+  // שמור תמיד את הגרסה העדכנית ביותר של הפונקציה ב־ref
+  useEffect(() => {
+    predicateRef.current = predicate;
+  }, [predicate]);
+
+  useEffect(() => {
+    const store = getStore<T>(storeKey);
+    if (!store) return;
+
+    const unsubscribe = store.subscribe((state) => {
+      const all = state.ids.map((id) => state.entities[id]);
+      const filteredEntities = all.filter(predicateRef.current);
+      setFiltered(filteredEntities);
+    });
+
+    return unsubscribe;
+  }, [storeKey]);
+
+  return filtered;
+};
+
+export const useSortedEntities = <T, K extends keyof T>(
+  storeKey: string,
+  property: K,
+  direction: 'asc' | 'desc' = 'asc'
+): T[] => {
+  const [sorted, setSorted] = useState<T[]>([]);
+
+  useEffect(() => {
+    const store = getStore<T>(storeKey);
+    if (!store) return;
+
+    const unsubscribe = store.subscribe((state) => {
+      const all = state.ids.map((id) => state.entities[id]);
+      const sortedEntities = [...all].sort((a: T, b: T) => {
+        const aValue = a?.[property];
+        const bValue = b?.[property];
+
+        if (aValue === bValue) return 0;
+        if (aValue === undefined || aValue === null) return 1;
+        if (bValue === undefined || bValue === null) return -1;
+        if (aValue > bValue) return direction === 'asc' ? 1 : -1;
+        return direction === 'asc' ? -1 : 1;
+      });
+      setSorted(sortedEntities);
+    });
+
+    return unsubscribe;
+  }, [storeKey, property, direction]);
+
+  return sorted;
 };
